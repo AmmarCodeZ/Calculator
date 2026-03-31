@@ -1,9 +1,7 @@
-/* ─────────────────────────────────────────────
-   LuxeCalc — script.js
-   ───────────────────────────────────────────── */
+
 
 (() => {
-  /* ── State ── */
+
   let current    = '0';
   let previous   = '';
   let operator   = null;
@@ -11,15 +9,12 @@
   let pendingResult = null;
 
   const SUBSCRIBED_KEY = 'luxecalc_subscribed';
-
-  /* ── DOM refs ── */
   const display    = document.getElementById('display');
   const expression = document.getElementById('expression');
   const overlay    = document.getElementById('modalOverlay');
   const unlockBtn  = document.getElementById('unlockBtn');
   const planCards  = document.querySelectorAll('.plan-card');
 
-  /* ── Helpers ── */
   const fmt = n => {
     const num = parseFloat(n);
     if (isNaN(num)) return n;
@@ -45,7 +40,6 @@
     }
   };
 
-  /* ── Calculator logic ── */
   const calculate = (a, b, op) => {
     const x = parseFloat(a), y = parseFloat(b);
     switch (op) {
@@ -139,7 +133,6 @@
   const clearOpHighlight = () =>
     document.querySelectorAll('.btn-op').forEach(b => b.classList.remove('active'));
 
-  /* ── Button ripple ── */
   const ripple = btn => {
     const r = document.createElement('span');
     r.style.cssText = `
@@ -161,7 +154,6 @@
     setTimeout(() => r.remove(), 400);
   };
 
-  /* ── Click handler ── */
   document.querySelector('.calc-grid').addEventListener('click', e => {
     const btn = e.target.closest('.btn');
     if (!btn) return;
@@ -178,7 +170,6 @@
     }
   });
 
-  /* ── Keyboard support ── */
   document.addEventListener('keydown', e => {
     if ('0123456789'.includes(e.key))       handleNumber(e.key);
     else if (e.key === '+')                 handleOperator('+');
@@ -195,7 +186,6 @@
     }
   });
 
-  /* ── Modal ── */
   let selectedPlan = null;
 
   const showModal = () => {
