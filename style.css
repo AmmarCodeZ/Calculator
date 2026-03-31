@@ -415,8 +415,6 @@ body {
   color: var(--text-dim);
   text-align: left;
 }
-
-/* ── Unlock button ── */
 .unlock-btn {
   width: 100%;
   padding: 16px;
@@ -446,7 +444,6 @@ body {
 .unlock-btn:not(:disabled):active {
   transform: scale(0.97);
 }
-
 .modal-fine {
   text-align: center;
   font-size: 11px;
@@ -454,8 +451,6 @@ body {
   margin-top: 14px;
   opacity: 0.7;
 }
-
-/* ── Responsive ── */
 @media (max-width: 400px) {
   .calc-wrapper { width: calc(100vw - 32px); padding: 22px 18px 22px; }
   .btn { height: 62px; font-size: 18px; }
