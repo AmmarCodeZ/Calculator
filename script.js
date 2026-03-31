@@ -1,0 +1,232 @@
+/* ─────────────────────────────────────────────
+   LuxeCalc — script.js
+   ───────────────────────────────────────────── */
+
+(() => {
+  /* ── State ── */
+  let current    = '0';
+  let previous   = '';
+  let operator   = null;
+  let freshResult = false;
+  let pendingResult = null;
+
+  const SUBSCRIBED_KEY = 'luxecalc_subscribed';
+
+  /* ── DOM refs ── */
+  const display    = document.getElementById('display');
+  const expression = document.getElementById('expression');
+  const overlay    = document.getElementById('modalOverlay');
+  const unlockBtn  = document.getElementById('unlockBtn');
+  const planCards  = document.querySelectorAll('.plan-card');
+
+  /* ── Helpers ── */
+  const fmt = n => {
+    const num = parseFloat(n);
+    if (isNaN(num)) return n;
+    if (!isFinite(num)) return 'Error';
+    const s = parseFloat(num.toPrecision(10)).toString();
+    const [int, dec] = s.split('.');
+    const formatted = parseInt(int, 10).toLocaleString('en-US');
+    return dec ? `${formatted}.${dec}` : formatted;
+  };
+
+  const setDisplay = val => {
+    display.textContent = fmt(String(val));
+    display.classList.remove('pop');
+    void display.offsetWidth;
+    display.classList.add('pop');
+  };
+
+  const updateExpression = () => {
+    if (previous && operator) {
+      expression.textContent = `${fmt(previous)} ${operator}`;
+    } else {
+      expression.textContent = '';
+    }
+  };
+
+  /* ── Calculator logic ── */
+  const calculate = (a, b, op) => {
+    const x = parseFloat(a), y = parseFloat(b);
+    switch (op) {
+      case '+': return x + y;
+      case '−': return x - y;
+      case '×': return x * y;
+      case '÷': return y === 0 ? 'Error' : x / y;
+      default:  return b;
+    }
+  };
+
+  const handleNumber = val => {
+    if (freshResult) { current = val; freshResult = false; }
+    else current = current === '0' ? val : current + val;
+    if (current.length > 12) return;
+    setDisplay(current);
+  };
+
+  const handleOperator = op => {
+    freshResult = false;
+    if (previous && operator && !freshResult) {
+      const res = calculate(previous, current, operator);
+      previous = String(res === 'Error' ? 0 : res);
+      setDisplay(previous);
+      current = previous;
+    } else {
+      previous = current;
+    }
+    operator = op;
+    freshResult = true;
+    updateExpression();
+    highlightOp(op);
+  };
+
+  const handleEquals = () => {
+    if (!operator || !previous) return;
+    const a = previous, b = current, op = operator;
+    const res = calculate(a, b, op);
+    expression.textContent = `${fmt(a)} ${op} ${fmt(b)} =`;
+    const result = res === 'Error' ? 'Error' : String(res);
+
+    if (localStorage.getItem(SUBSCRIBED_KEY)) {
+      finishResult(result);
+    } else {
+      pendingResult = result;
+      showModal();
+    }
+    operator = null;
+    previous = '';
+    freshResult = true;
+    clearOpHighlight();
+  };
+
+  const finishResult = val => {
+    current = val;
+    setDisplay(val);
+  };
+
+  const handleClear = () => {
+    current = '0'; previous = ''; operator = null; freshResult = false;
+    setDisplay('0');
+    expression.textContent = '';
+    clearOpHighlight();
+  };
+
+  const handleSign = () => {
+    if (current === '0' || current === 'Error') return;
+    current = String(parseFloat(current) * -1);
+    setDisplay(current);
+  };
+
+  const handlePercent = () => {
+    if (current === 'Error') return;
+    current = String(parseFloat(current) / 100);
+    setDisplay(current);
+  };
+
+  const handleDecimal = () => {
+    if (freshResult) { current = '0.'; freshResult = false; }
+    else if (!current.includes('.')) current += '.';
+    setDisplay(current);
+  };
+
+  /* ── Op highlight ── */
+  const highlightOp = op => {
+    clearOpHighlight();
+    document.querySelectorAll('.btn-op').forEach(b => {
+      if (b.dataset.value === op) b.classList.add('active');
+    });
+  };
+  const clearOpHighlight = () =>
+    document.querySelectorAll('.btn-op').forEach(b => b.classList.remove('active'));
+
+  /* ── Button ripple ── */
+  const ripple = btn => {
+    const r = document.createElement('span');
+    r.style.cssText = `
+      position:absolute;border-radius:50%;
+      background:rgba(255,255,255,0.18);
+      width:60px;height:60px;
+      top:50%;left:50%;
+      transform:translate(-50%,-50%) scale(0);
+      animation:rippleAnim 0.38s ease-out forwards;
+      pointer-events:none;
+    `;
+    if (!document.getElementById('rippleStyle')) {
+      const s = document.createElement('style');
+      s.id = 'rippleStyle';
+      s.textContent = `@keyframes rippleAnim{to{transform:translate(-50%,-50%) scale(2.4);opacity:0}}`;
+      document.head.appendChild(s);
+    }
+    btn.appendChild(r);
+    setTimeout(() => r.remove(), 400);
+  };
+
+  /* ── Click handler ── */
+  document.querySelector('.calc-grid').addEventListener('click', e => {
+    const btn = e.target.closest('.btn');
+    if (!btn) return;
+    ripple(btn);
+    const { action, value } = btn.dataset;
+    switch (action) {
+      case 'num':     handleNumber(value);   break;
+      case 'op':      handleOperator(value); break;
+      case 'equals':  handleEquals();        break;
+      case 'clear':   handleClear();         break;
+      case 'sign':    handleSign();          break;
+      case 'percent': handlePercent();       break;
+      case 'decimal': handleDecimal();       break;
+    }
+  });
+
+  /* ── Keyboard support ── */
+  document.addEventListener('keydown', e => {
+    if ('0123456789'.includes(e.key))       handleNumber(e.key);
+    else if (e.key === '+')                 handleOperator('+');
+    else if (e.key === '-')                 handleOperator('−');
+    else if (e.key === '*')                 handleOperator('×');
+    else if (e.key === '/')                 { e.preventDefault(); handleOperator('÷'); }
+    else if (e.key === 'Enter' || e.key === '=') handleEquals();
+    else if (e.key === 'Escape' || e.key === 'c') handleClear();
+    else if (e.key === '.')                 handleDecimal();
+    else if (e.key === '%')                 handlePercent();
+    else if (e.key === 'Backspace') {
+      if (current.length > 1) { current = current.slice(0, -1); setDisplay(current); }
+      else { current = '0'; setDisplay('0'); }
+    }
+  });
+
+  /* ── Modal ── */
+  let selectedPlan = null;
+
+  const showModal = () => {
+    selectedPlan = null;
+    unlockBtn.disabled = true;
+    unlockBtn.textContent = 'Select a Plan to Unlock';
+    planCards.forEach(c => c.classList.remove('selected'));
+    overlay.classList.add('show');
+  };
+
+  planCards.forEach(card => {
+    card.addEventListener('click', () => {
+      planCards.forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedPlan = card.dataset.plan;
+      unlockBtn.disabled = false;
+      unlockBtn.textContent = '✦ Unlock My Result';
+    });
+  });
+
+  unlockBtn.addEventListener('click', () => {
+    if (!selectedPlan) return;
+    localStorage.setItem(SUBSCRIBED_KEY, '1');
+    overlay.classList.remove('show');
+    if (pendingResult !== null) {
+      finishResult(pendingResult);
+      pendingResult = null;
+    }
+  });
+
+  /* ── Prevent overlay click closing ── */
+  overlay.addEventListener('click', e => { if (e.target === overlay) { /* intentionally blocked */ } });
+
+})();
