@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LuxeCalc</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- Background orbs -->
+  <div class="bg-orb orb1"></div>
+  <div class="bg-orb orb2"></div>
+
+  <div class="calc-wrapper">
+    <div class="calc-header">
+      <span class="calc-brand">LuxeCalc</span>
+      <span class="calc-dot"></span>
+    </div>
+
+    <div class="calc-display">
+      <div class="calc-expression" id="expression"></div>
+      <div class="calc-result" id="display">0</div>
+    </div>
+
+    <div class="calc-grid">
+      <!-- Row 1 -->
+      <button class="btn btn-fn" data-action="clear">AC</button>
+      <button class="btn btn-fn" data-action="sign">+/−</button>
+      <button class="btn btn-fn" data-action="percent">%</button>
+      <button class="btn btn-op" data-action="op" data-value="÷">÷</button>
+      <!-- Row 2 -->
+      <button class="btn" data-action="num" data-value="7">7</button>
+      <button class="btn" data-action="num" data-value="8">8</button>
+      <button class="btn" data-action="num" data-value="9">9</button>
+      <button class="btn btn-op" data-action="op" data-value="×">×</button>
+      <!-- Row 3 -->
+      <button class="btn" data-action="num" data-value="4">4</button>
+      <button class="btn" data-action="num" data-value="5">5</button>
+      <button class="btn" data-action="num" data-value="6">6</button>
+      <button class="btn btn-op" data-action="op" data-value="−">−</button>
+      <!-- Row 4 -->
+      <button class="btn" data-action="num" data-value="1">1</button>
+      <button class="btn" data-action="num" data-value="2">2</button>
+      <button class="btn" data-action="num" data-value="3">3</button>
+      <button class="btn btn-op" data-action="op" data-value="+">+</button>
+      <!-- Row 5 -->
+      <button class="btn btn-wide" data-action="num" data-value="0">0</button>
+      <button class="btn" data-action="decimal">.</button>
+      <button class="btn btn-eq" data-action="equals">=</button>
+    </div>
+  </div>
+
+  <!-- Subscription Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modal">
+      <div class="modal-glow"></div>
+      <div class="modal-top">
+        <div class="modal-badge">PREMIUM</div>
+        <h2 class="modal-title">Unlock Your Result</h2>
+        <p class="modal-sub">One-time setup. Yours forever.</p>
+      </div>
+
+      <div class="plans">
+        <div class="plan-card" id="planWeekly" data-plan="weekly">
+          <div class="plan-label">Weekly</div>
+          <div class="plan-price">$2<span>.99</span></div>
+          <div class="plan-cycle">per week</div>
+          <div class="plan-perks">
+            <span>✦ Unlimited calculations</span>
+            <span>✦ Full history</span>
+          </div>
+        </div>
+        <div class="plan-card plan-featured" id="planMonthly" data-plan="monthly">
+          <div class="plan-chip">BEST VALUE</div>
+          <div class="plan-label">Monthly</div>
+          <div class="plan-price">$7<span>.99</span></div>
+          <div class="plan-cycle">per month</div>
+          <div class="plan-perks">
+            <span>✦ Everything in Weekly</span>
+            <span>✦ Priority support</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="unlock-btn" id="unlockBtn" disabled>Select a Plan to Unlock</button>
+      <p class="modal-fine">Cancel anytime. No commitment required.</p>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
